@@ -343,7 +343,16 @@
       if (current.t >= 1) state = 'ready';
     }
     Engine.update(engine, STEP_MS);
-    for (const e of toRemove) { Composite.remove(engine.world, e.body); ent.delete(e.body.id); }
+    for (const e of toRemove) {
+      Composite.remove(engine.world, e.body); ent.delete(e.body.id);
+      wakeNear(e.body.bounds, 30);   // 支撐物消失：叫醒壓在上面、靠在旁邊的物體
+    }
+    // 正在移動的物體會叫醒碰到的睡眠物體（例如支架被撞歪、滑開）
+    for (const e of [...blocks, ...enemies, ...shots]) {
+      const b = e.body;
+      if (!b.isSleeping && !e.dead && (b.speed > 0.4 || Math.abs(b.angularVelocity) > 0.01)) wakeNear(b.bounds, 12);
+    }
+    if (stepCount % 10 === 0) wakeUnsupported();
     if (toRemove.length) {
       blocks = blocks.filter(e => !e.dead); enemies = enemies.filter(e => !e.dead); shots = shots.filter(e => !e.dead);
       toRemove = []; updateHud();
@@ -393,6 +402,36 @@
     if (winPending && !endShown) {
       winTimer++;
       if ((winTimer > 70 && worldQuiet(0.5)) || winTimer > 60 * 4) finishWin();
+    }
+  }
+
+  // Matter.js 的睡眠物體不會自己察覺底下的支撐不見了，需要手動叫醒
+  function wakeNear(bd, pad) {
+    for (const e of [...blocks, ...enemies]) {
+      const b = e.body;
+      if (!b.isSleeping || e.dead) continue;
+      const o = b.bounds;
+      if (o.max.x > bd.min.x - pad && o.min.x < bd.max.x + pad && o.max.y > bd.min.y - pad && o.min.y < bd.max.y + pad) Sleeping.set(b, false);
+    }
+  }
+
+  // 睡眠中的物體如果重心底下已經沒有東西撐著（支架慢慢滑開、倒向一邊），就叫醒讓它掉下來
+  function wakeUnsupported() {
+    const all = [...blocks, ...enemies, ...shots].filter(e => !e.dead);
+    for (const e of all) {
+      const b = e.body;
+      if (!b.isSleeping) continue;
+      const bb = b.bounds;
+      if (bb.max.y >= G - 3) continue;            // 放在地面上
+      let lo = Infinity, hi = -Infinity;
+      for (const o of all) {
+        if (o === e) continue;
+        const ob = o.body.bounds;
+        if (ob.max.x <= bb.min.x + 2 || ob.min.x >= bb.max.x - 2) continue;   // 水平沒有重疊
+        if (ob.min.y > bb.max.y + 4 || ob.max.y <= bb.max.y) continue;        // 不是在正下方接觸
+        lo = Math.min(lo, ob.min.x); hi = Math.max(hi, ob.max.x);
+      }
+      if (!(lo <= b.position.x && b.position.x <= hi)) Sleeping.set(b, false);
     }
   }
 
@@ -962,6 +1001,9 @@
     ability: activateAbility, stars: starsFor,
     sim(n) { for (let i = 0; i < n; i++) { stepGame(); updateVisuals(1 / 60); } render(); },
     set paused(v) { paused = v; }, get view() { return view; },
+    destroyBlocks(pred) { blocks.filter(e => pred(e.body.position, e)).forEach(destroy); },
+    get sleeping() { return [...blocks, ...enemies].filter(e => e.body.isSleeping).length; },
+    wakeAll() { [...blocks, ...enemies].forEach(e => Sleeping.set(e.body, false)); },
     info() { return { state, enemies: enemies.map(e => [e.type, Math.round(e.body.position.x), Math.round(e.body.position.y), +e.hp.toFixed(1)]), blocks: blocks.length, score, queue: queue.slice(), winPending, endShown }; },
   };
 
