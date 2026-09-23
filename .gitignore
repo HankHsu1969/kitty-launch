@@ -1,0 +1,9 @@
+# H站產出的原始大圖（42 MB），遊戲只用 assets/ 裡壓縮過的版本
+raw/
+
+# 本機工具設定
+.claude/
+
+# 系統檔
+Thumbs.db
+.DS_Store

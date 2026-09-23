@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>萌喵彈射大作戰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Noto+Sans+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- 標題畫面 -->
+<section id="screen-title" class="screen">
+  <div class="title-wrap">
+    <h1 class="logo">萌喵彈射<br><span>大作戰</span></h1>
+    <p class="subtitle">Kitty Launch vs. Angry Cats</p>
+    <button class="btn big" id="btn-start">開始遊戲</button>
+    <p class="hint">拖曳小貓、放開發射，擊垮憤怒貓的高塔！</p>
+  </div>
+</section>
+
+<!-- 選關畫面 -->
+<section id="screen-levels" class="screen hidden">
+  <div class="panel levels-panel">
+    <h2>選擇關卡</h2>
+    <div id="level-grid" class="level-grid"></div>
+    <div class="row">
+      <button class="btn" id="btn-levels-back">返回</button>
+    </div>
+  </div>
+</section>
+
+<!-- 遊戲中 HUD -->
+<div id="hud" class="hidden">
+  <div class="hud-left">
+    <div class="chip" id="hud-level">第 1 關</div>
+    <div class="chip enemy-chip"><img src="assets/enemy_small.png" alt=""><span id="hud-enemies">0</span></div>
+  </div>
+  <div class="hud-score">
+    <div class="score-label">分數</div>
+    <div id="hud-score">0</div>
+  </div>
+  <div class="hud-right">
+    <button class="icon-btn" id="btn-music" title="音樂">🎵</button>
+    <button class="icon-btn" id="btn-sfx" title="音效">🔊</button>
+    <button class="icon-btn" id="btn-restart" title="重玩">↻</button>
+    <button class="icon-btn" id="btn-pause" title="暫停">❚❚</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- 彈出視窗（勝利/失敗/暫停） -->
+<div id="modal" class="modal hidden">
+  <div class="panel modal-panel">
+    <h2 id="modal-title">過關！</h2>
+    <div id="modal-stars" class="stars">
+      <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+    </div>
+    <div id="modal-score" class="modal-score"></div>
+    <div id="modal-best" class="modal-best"></div>
+    <div class="row" id="modal-buttons"></div>
+  </div>
+</div>
+
+<div id="loading" class="loading">載入中…</div>
+
+<script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
