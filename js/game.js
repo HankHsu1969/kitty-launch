@@ -485,18 +485,14 @@
 
     const bg = IMG.bg;
     if (bg.naturalWidth) {
-      // 視窗比例不是 16:9 時，把背景邊緣延伸出去填滿
-      const bw = bg.naturalWidth, bh = bg.naturalHeight;
+      // 視窗比例不是 16:9 時，以地面為錨點等比放大背景蓋滿畫面（不拉伸邊緣）；
+      // 太高的視窗放大有上限，剩下的上下空間用天空色與泥土色補滿
       const ex = ox / scale + 40, ey = oy / scale + 40;
-      if (ey > 40) {
-        ctx.drawImage(bg, 0, 0, bw, 2, -ex, -ey, W + ex * 2, ey + 1);
-        ctx.drawImage(bg, 0, bh - 2, bw, 2, -ex, H - 1, W + ex * 2, ey + 1);
-      }
-      if (ex > 40) {
-        ctx.drawImage(bg, 0, 0, 2, bh, -ex, 0, ex + 1, H);
-        ctx.drawImage(bg, bw - 2, 0, 2, bh, W - 1, 0, ex + 1, H);
-      }
-      ctx.drawImage(bg, 0, 0, W, H);
+      const k = Math.max(1, (W + ex * 2) / W, Math.min(1.6, (G + ey) / G));
+      const bx = W / 2 - W * k / 2, by = G - G * k, bh = H * k;
+      if (by > -ey) { ctx.fillStyle = '#11a9fc'; ctx.fillRect(-ex, -ey, W + ex * 2, by + ey + 1); }
+      if (by + bh < H + ey) { ctx.fillStyle = '#98582b'; ctx.fillRect(-ex, by + bh - 1, W + ex * 2, H + ey - by - bh + 1); }
+      ctx.drawImage(bg, bx, by, W * k, bh);
     }
     if (!engine) return;
 
