@@ -14,7 +14,7 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body {
-  margin: 0; height: 100%; overflow: hidden;
+  margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none;
   background: #5fbef2;
   font-family: var(--font);
   color: var(--ink);
@@ -22,7 +22,7 @@ html, body {
 }
 
 #game {
-  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  position: fixed; left: 0; top: 0; width: 100%; height: 100%;
   display: block; touch-action: none;
 }
 
@@ -99,7 +99,7 @@ html, body {
 }
 
 #screen-levels { background: rgba(40, 90, 140, .35); backdrop-filter: blur(3px); }
-.levels-panel { width: min(900px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
+.levels-panel { width: min(900px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow: auto; }
 .level-grid {
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;
 }
@@ -177,7 +177,7 @@ html, body {
   background: rgba(20, 40, 70, .45); backdrop-filter: blur(2px);
   padding: 16px;
 }
-.modal-panel { width: min(520px, 100%); animation: drop-in .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.modal-panel { width: min(520px, 100%); max-height: 100%; overflow: auto; animation: drop-in .5s cubic-bezier(.2, 1.4, .4, 1) both; }
 .stars { font-size: clamp(54px, 8vw, 88px); line-height: 1; margin: 4px 0 8px; }
 .stars .star { color: #d9cdb8; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; display: inline-block; margin: 0 4px; }
 .stars .star:nth-child(2) { transform: translateY(-14px); font-size: 1.15em; }
@@ -202,6 +202,39 @@ html, body {
   #hud { padding: 8px; }
   .hud-score .score-label { display: none; }
 }
+/* 手機橫放：高度很矮時縮小標題、關卡卡片與彈出視窗 */
+@media (max-height: 500px) {
+  .title-wrap { margin-top: 2vh; }
+  .logo { font-size: clamp(32px, 11vh, 118px); }
+  .subtitle { margin: .3em 0 .6em; }
+  .hint { margin-top: .6em; }
+  .panel { padding: 12px 18px 16px; border-width: 4px; border-radius: 22px; }
+  .panel h2 { margin-bottom: 8px; font-size: 24px; }
+  .level-grid { grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .level-card { aspect-ratio: auto; height: min(21vh, 110px); border-radius: 16px; }
+  .level-card .num { font-size: clamp(24px, 9vh, 44px); }
+  .row { margin-top: 12px; }
+  .stars { font-size: 48px; }
+  .modal .lose-cat { width: 72px; height: 72px; }
+  .modal-score { font-size: 30px; }
+}
+
+/* 手機直放：遊戲是橫向畫面，提示轉成橫向 */
+.rotate-hint { display: none; }
+@media (orientation: portrait) and (pointer: coarse) and (max-width: 820px) {
+  .rotate-hint {
+    position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 18px; padding: 24px; text-align: center;
+    background: linear-gradient(#5fbef2, #8fd3f7); color: #fff;
+    font-weight: 900; font-size: 22px; text-shadow: 0 3px 0 var(--ink);
+  }
+  .rotate-hint .phone {
+    width: 64px; height: 108px; border: 6px solid var(--ink); border-radius: 14px; background: var(--cream);
+    box-shadow: 0 6px 0 var(--ink); animation: rotate-phone 2s ease-in-out infinite;
+  }
+}
+@keyframes rotate-phone { 0%, 20% { transform: rotate(0); } 50%, 80% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition: none !important; }
 }

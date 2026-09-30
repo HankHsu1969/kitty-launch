@@ -56,12 +56,17 @@
   let view = { scale: 1, ox: 0, oy: 0, dpr: 1 };
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const cw = window.innerWidth, ch = window.innerHeight;
+    // 手機上 100vh 會包含網址列底下的區域，改用實際可見大小
+    const vv = window.visualViewport;
+    const cw = Math.round(vv ? vv.width : window.innerWidth), ch = Math.round(vv ? vv.height : window.innerHeight);
     canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
+    canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px';
     const scale = Math.min(cw / W, ch / H);
     view = { scale, ox: (cw - W * scale) / 2, oy: (ch - H * scale) / 2, dpr };
   }
   window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', () => setTimeout(resize, 200));
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
   resize();
   const toWorld = (cx, cy) => ({ x: (cx - view.ox) / view.scale, y: (cy - view.oy) / view.scale });
 
